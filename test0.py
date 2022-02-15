@@ -8,4 +8,4 @@ Created on Tue Feb 15 10:50:57 2022
 
 a = float(input('a = '))
 b = float(input('b = '))
-print(a + b)
+print('a + B =', a + b)
