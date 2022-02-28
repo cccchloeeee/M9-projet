@@ -41,9 +41,11 @@ Sp = 93.07      # m² surface plaster
 
 # Air-flow rate
 # -------------
-Va = l * L * H      # m³ volume of air  #est-ce qu'on enlève les volumes mur?
+Va_livingroom = 6 * 4 * 2.5        # m³ volume of air  in the living room
+Va_bathroom = 2 * 4 * 2.5          # m³ volume of air  in the bathroom
 ACH = 1             # air changes per hour
-Va_dot = ACH * Va / 3600    # m³/s air infiltration
+Va_livingroom_dot = ACH * Va_livingroom / 3600    # m³/s air infiltration
+Va_bathroom_dot = ACH * Va_bathroom / 3600
 
 # Thermophyscal properties
 # ------------------------
@@ -107,11 +109,14 @@ h = pd.DataFrame([{'in': 4., 'out': 10}])   # Valeurs À VÉRIFIER sur DB
 
 # Thermal conductances
 # Conduction
-Gd_cd = dividingwall['Conductivity'] / \
+Gdw_cd = dividingwall['Conductivity'] / \
     dividingwall['Width'] * dividingwall['Surface']
 Gw_cd = wall['Conductivity'] / wall['Width'] * wall['Surface']
 
 # Convection
-Gc_cv = h *
-Gw_cv = h * wall['Surface'][0]     # wall
-Gg_cv = h * wall['Surface'][2]     # glass
+Gp_w_cv = Gp_dw_cv = h * dividingwall['Surface'][0]   # plaster
+Gw_cv = h * opening['Surface'][0]                     # glass
+
+# ventilation & advection
+Gv_livingroom =
+Gv_bathroom =
