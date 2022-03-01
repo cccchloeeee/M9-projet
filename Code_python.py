@@ -33,11 +33,12 @@ Sw_b = 1.23     # m² surface window in bathroom
 Sw_l = 6.9      # m² surface window in livingroom
 Sd = 2.2        # m² surface/door (2 doors in model)
 
+Sf_b = 4 * 2    # m² surface floor in bathroom
+Sf_l = 4 * 6    # m² surface floor in livingroom
+
 Sc = 21.87      # m² surface concret
 Si = 57.47      # m² surface insulation
 Sp = 93.07      # m² surface plaster
-
-# exemple : Sg = l**2     Sc = Si = 5 * Sg
 
 # Air-flow rate
 # -------------
@@ -79,18 +80,29 @@ opening = {'Conductivity': [X, X],      # W/m.K
            'Slice': [1, 1]}             # nb of meshes
 opening = pd.DataFrame(opening, index=['Window' 'Door'])
 
+floor = {'Conductivity': [X],      # W/m.K
+         'Density': [X],         # kg/m³
+         'Specific heat': [X],   # J/kg.K
+         'Width': [X],           # m
+         'Surface': [X],         # m²
+         'Slice': [1]}           # nb of meshes
+floor = pd.DataFrame(floor, index=['Floor'])
+
 # Radiative properties
 # --------------------
 """ from DesignBuilder"""  # Valeurs à RÉCUPÉRER de DB
-ε_cLW = 0.9     # long wave concrete emmisivity
+ε_cLW = 0.9     # long wave concrete emmisivity     concrete
 α_cSW = 0.6     # short wave concrete absorptivity
 
-ε_pLW = XX      # long wave plaster emmisivity
+ε_pLW = XX      # long wave plaster emmisivity      plaster
 α_pSW = XX      # short wave plaster absorptivity
 
-ε_wLW = XX     # long wave window emmisivity
+ε_fLW = XX      # long wave plaster emmisivity      floor
+α_fSW = XX      # short wave plaster absorptivity
+
+ε_wLW = XX     # long wave window emmisivity        window
 α_wSW = XX     # short wave window absorptivity
-τ_gSW = XX     # short wave window transmitance
+τ_wSW = XX     # short wave window transmitance
 
 
 σ = 5.67e-8     # W/m².K⁴ Stefan-Bolzmann constant
@@ -111,31 +123,37 @@ h = pd.DataFrame([{'in': 4., 'out': 10}])   # Valeurs À VÉRIFIER sur DB
 # --------------------
 # Conduction
 Gdw_cd = dividingwall['Conductivity'] / \
-    dividingwall['Width'] * dividingwall['Surface']
-Gw_cd = wall['Conductivity'] / wall['Width'] * wall['Surface']
+    dividingwall['Width'] * dividingwall['Surface']                 # d-wall
+Gw_cd = wall['Conductivity'] / wall['Width'] * wall['Surface']      # wall
+Go_cd = opening['Conductivity'] / opening['Width'] * \
+    opening['Surface']                                              # opening
+Gf_cd = floor['Conductivity'] / floor['Width'] * floor['Surface']   # floor
 
 # Convection
 Gp_w_cv = Gp_dw_cv = h * dividingwall['Surface'][0]   # plaster inside
 Gc_w_cv = h * wall['Surface'][0]                      # concrete outdoor
 Gw_cv = h * opening['Surface'][0]                     # glass
+Gd_cv = h * opening['Surface'][1]                     # door
 
 # ventilation & advection
 Gv_livingroom = Va_livingroom_dot * air['Density'] * air['Specific heat']
 Gv_bathroom = Va_bathroom * air['Density'] * air['Specific heat']
 
-# glass: convection outdoor & conduction
-Ggs = float(1 / (1 / Gg['out'] + 1 / (2 * G_cd['Glass'])))  # ???
-# comment définir le G de la fenêtre puisqu'on simplifie le modèle ? (pour avoir Géq)
-
 # Thermal capacities
 # ------------------
 Cdw = dividingwall['Density'] * dividingwall['Specific heat'] * \
-    dividingwall['Surface'] * dividingwall['Width']
-Cw = wall['Density'] * wall['Specific heat'] * wall['Surface'] * wall['Width']
-C['Air'] = air['Density'] * air['Specific heat'] * Va
+    dividingwall['Surface'] * \
+    dividingwall['Width']  # capacités couches cloison
+Cw = wall['Density'] * wall['Specific heat'] * wall['Surface'] * \
+    wall['Width']  # capacités des couches mur
 
-# Incidence matrix
-# ----------------
+Ca_l = air['Density'] * air['Specific heat'] * \
+    Va_livingroom                   # capacité air dans livingroom
+Ca_b = air['Density'] * air['Specific heat'] * \
+    Va_bathroom                     # capacité air dans bathroom
+
+# Incidence matrix A
+# ------------------
 A = np.zeros([60, 49])
 
 # Flux directed to livingroom
@@ -202,4 +220,16 @@ A[57, 48] = 1
 A[58, 31] = 1
 A[59, 31] = 1
 
-print(A)
+# Conductance matrix G
+# --------------------
+# à insérer depuis github
+
+# Capacity matrix C
+# -----------------
+# à insérer depuis github
+
+# Vectors of temperature sources b
+# --------------------------------
+
+# Vectors of heat sources f
+# -------------------------
