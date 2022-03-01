@@ -58,7 +58,7 @@ dividingwall = {'Conductivity': [0.25, 0.0457, 0.25],      # W/m.K
                 'Density': [28000, 40, 28000],             # kg/m³
                 'Specific heat': [896, 1450, 896],         # J/kg.K
                 'Width': [0.013, 0.05, 0.013],             # m
-                'Surface': [XX, XX, XX],  # À COMPLÉTER    # m²
+                'Surface': [X, X, X]                       # m²
                 'Slice': [1, 1, 1]}                        # nb of meshes
 dividingwall = pd.DataFrame(
     dividingwall, index=['Plaster' 'Insulation' 'Plaster'])
@@ -67,7 +67,6 @@ wall = {'Conductivity': [2.3, 0.0457, 0.25],         # W/m.K
         'Density': [2300, 40, 28000],             # kg/m³
         'Specific heat': [1000, 1450, 896],       # J/kg.K
         'Width': [0.3, 0.05, 0.013],              # m
-        'Surface': [XX, XX, XX],  # À COMPLÉTER   # m²
         'Slice': [1, 1, 1]}                       # nb of meshes
 wall = pd.DataFrame(wall, index=['Concrete' 'Insulation' 'Plaster'])
 
@@ -76,7 +75,6 @@ opening = {'Conductivity': [X, X],      # W/m.K
            'Density': [X, X],           # kg/m³
            'Specific heat': [X, X],     # J/kg.K
            'Width': [X, X],             # m
-           'Surface': [XX, XX],         # m²
            'Slice': [1, 1]}             # nb of meshes
 opening = pd.DataFrame(opening, index=['Window' 'Door'])
 
@@ -84,27 +82,17 @@ floor = {'Conductivity': [X],      # W/m.K
          'Density': [X],         # kg/m³
          'Specific heat': [X],   # J/kg.K
          'Width': [X],           # m
-         'Surface': [X],         # m²
          'Slice': [1]}           # nb of meshes
 floor = pd.DataFrame(floor, index=['Floor'])
 
+# Surfaces
+surfaces = {'LR': [X, X, X, X, X],
+            'BR': [X, X, X, X, X],
+            'LR-BR': [X, X, X, X, X]}
+surfaces =
+
 # Radiative properties
 # --------------------
-""" from DesignBuilder"""  # Valeurs à RÉCUPÉRER de DB
-ε_cLW = 0.9     # long wave concrete emmisivity     concrete
-α_cSW = 0.6     # short wave concrete absorptivity
-
-ε_pLW = XX      # long wave plaster emmisivity      plaster
-α_pSW = XX      # short wave plaster absorptivity
-
-ε_fLW = XX      # long wave plaster emmisivity      floor
-α_fSW = XX      # short wave plaster absorptivity
-
-ε_wLW = XX     # long wave window emmisivity        window
-α_wSW = XX     # short wave window absorptivity
-τ_wSW = XX     # short wave window transmitance
-
-
 σ = 5.67e-8     # W/m².K⁴ Stefan-Bolzmann constant
 
 Fpw = 8.13 / 93.07     # view factor plaster - window (facteur de forme)
@@ -132,7 +120,7 @@ Gf_cd = floor['Conductivity'] / floor['Width'] * floor['Surface']   # floor
 # Convection
 Gp_w_cv = Gp_dw_cv = h * dividingwall['Surface'][0]   # plaster inside
 Gc_w_cv = h * wall['Surface'][0]                      # concrete outdoor
-Gw_cv = h * opening['Surface'][0]                     # glass
+Gw_cv = h * opening['Surface'][0]                     # glass A SUPPRIMER ?
 Gd_cv = h * opening['Surface'][1]                     # door
 
 # ventilation & advection
@@ -231,17 +219,20 @@ A[59, 31] = 1
 # Vectors of temperature sources b
 # --------------------------------
 T0 = X      # outdoor temperature
-T1 = X      # indoor temperature
-T2 = X      # next room temperature
+T1 = X      # next room temperature
+T2 = X      # temperature wanted in the livingroom
+T3 = X      # temperature wanted in the bathroom
 
 b = np.zeros(60)
-b[[0, 8, 16, 24, 25, 45, 49, 57, 58, 59]] = T0
-b[[16, 25, 45, 49, 57, 58, 59]] = T1
-b[[24, 25, 45, 49, 57, 58, 59]] = T0
-
-
-b = np.zeros(12)
-b[[0, 8, 10, 11]] = 10 + np.array([0, 80, 100, 110])
+b[[0, 12, 24, 45, 57, 59]] = T0
+b[[8, 16, 49]] = T1
+b[25] = T2
+b[58] = T3
 
 # Vectors of heat sources f
 # -------------------------
+f = np.zeros()
+
+
+f = np.zeros(8)
+f[[0, 4, 6, 7]] = 1000 + np.array([0, 4000, 6000, 7000])
