@@ -230,6 +230,18 @@ A[59, 31] = 1
 
 # Vectors of temperature sources b
 # --------------------------------
+T0 = X      # outdoor temperature
+T1 = X      # indoor temperature
+T2 = X      # next room temperature
+
+b = np.zeros(60)
+b[[0, 8, 16, 24, 25, 45, 49, 57, 58, 59]] = T0
+b[[16, 25, 45, 49, 57, 58, 59]] = T1
+b[[24, 25, 45, 49, 57, 58, 59]] = T0
+
+
+b = np.zeros(12)
+b[[0, 8, 10, 11]] = 10 + np.array([0, 80, 100, 110])
 
 # Vectors of heat sources f
 # -------------------------
