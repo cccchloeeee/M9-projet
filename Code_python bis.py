@@ -5,7 +5,7 @@ Created on Tue Feb 15 11:29:39 2022
 
 @author: chloechallamel
 
-Essai de code pour le projet M9
+Code pour le projet M9
 """
 
 import numpy as np
@@ -50,23 +50,22 @@ materials = {'Conductivity': [2.3, 0.0457, 0.25, 0, 0, 0],      # W/m.K
              'Width': [0.3, 0.05, 0.013, 0, 0, 0],              # m
              'Slice': [1, 1, 1, 1, 1, 1]}                       # nb of meshes
 materials = pd.DataFrame(
-    materials, index=['Concrete' 'Insulation' 'Plaster' 'Glass' 'WoodDoor',
-                      'WoodFloor'])
+    materials, index=['Concrete', 'Insulation', 'Plaster', 'Glass', 'Door',
+                      'Floor'])
 
 # Surfaces
-surfaces = array
 surfaces = {'LR': [13.11, 18.4, 6.6, 1.89, 48],      # m²
             'BR': [15, 3.8, 1.2, 0, 16],
             'LR-BR': [8.11, 0, 0, 1.89, 0]}
 surfaces = pd.DataFrame(
-    surfaces, index=['Dividingwall' 'Wall' 'Window' 'Door' 'Floor'])
+    surfaces, index=['Dividingwall', 'Wall', 'Window', 'Door', 'Floor'])
 
 # Radiative properties
 # --------------------
 σ = 5.67e-8     # W/m².K⁴ Stefan-Bolzmann constant
 
 Fpw = 8.13 / 93.07     # view factor plaster - window (facteur de forme)
-# RECALCULER AVEC SURFACE FIONA
+# valeur fausse --> RECALCULER AVEC SURFACE FIONA
 
 Tm = 20 + 273   # mean temperature for radiative exchange
 
@@ -81,8 +80,93 @@ h = pd.DataFrame([{'in': 4., 'out': 10}])   # Valeurs À VÉRIFIER sur DB
 # --------------------
 # Conduction
 # Conduction zone 1 : LR
-Gcd_LR_c = materials['Conductivity'][0] / \
-    materials['Width'][0] * surfaces['LR'][1]
+#            in wall
+Gcd_LR_w_c = materials['Conductivity']['Concrete'] / \
+    materials['Width']['Concrete'] * surfaces['LR']['Wall']
+
+Gcd_LR_w_i = materials['Conductivity']['Insulation'] / \
+    materials['Width']['Insulation'] * surfaces['LR']['Wall']
+
+Gcd_LR_w_p = materials['Conductivity']['Plaster'] / \
+    materials['Width']['Plaster'] * surfaces['LR']['Wall']
+
+#            in dividing wall
+Gcd_LR_dw_p = materials['Conductivity']['Plaster'] / \
+    materials['Width']['Plaster'] * surfaces['LR']['Dividingwall']
+
+Gcd_LR_dw_i = materials['Conductivity']['Insulation'] / \
+    materials['Width']['Insulation'] * surfaces['LR']['Dividingwall']
+
+#           door
+Gcd_LR_d = materials['Conductivity']['Door'] / \
+    materials['Width']['Door'] * surfaces['LR']['Door']
+
+#           floor
+Gcd_LR_f = materials['Conductivity']['Floor'] / \
+    materials['Width']['Floor'] * surfaces['LR']['Floor']
+
+# Conduction zone 2 : BR
+#            in wall
+Gcd_BR_w_c = materials['Conductivity']['Concrete'] / \
+    materials['Width']['Concrete'] * surfaces['BR']['Wall']
+
+Gcd_BR_w_i = materials['Conductivity']['Insulation'] / \
+    materials['Width']['Insulation'] * surfaces['BR']['Wall']
+
+Gcd_BR_w_p = materials['Conductivity']['Plaster'] / \
+    materials['Width']['Plaster'] * surfaces['BR']['Wall']
+
+#            in dividing wall
+Gcd_BR_dw_p = materials['Conductivity']['Plaster'] / \
+    materials['Width']['Plaster'] * surfaces['BR']['Dividingwall']
+
+Gcd_BR_dw_i = materials['Conductivity']['Insulation'] / \
+    materials['Width']['Insulation'] * surfaces['BR']['Dividingwall']
+
+#           floor
+Gcd_BR_f = materials['Conductivity']['Floor'] / \
+    materials['Width']['Floor'] * surfaces['BR']['Floor']
+
+# Conduction zone 3 : LR-BR
+#            in dividing wall
+Gcd_LRBR_dw_p = materials['Conductivity']['Plaster'] / \
+    materials['Width']['Plaster'] * surfaces['LR-BR']['Dividingwall']
+
+Gcd_LRBR_dw_i = materials['Conductivity']['Insulation'] / \
+    materials['Width']['Insulation'] * surfaces['LR-BR']['Dividingwall']
+
+#           door
+Gcd_LRBR_d = materials['Conductivity']['Door'] / \
+    materials['Width']['Door'] * surfaces['LR-BR']['Door']
+
+# Convection
+# Convection zone 1 : LR
+Gcv_LR_w = h * surfaces['LR']['Wall']               # in wall
+
+Gcv_LR_dw = h * surfaces['LR']['Dividingwall']      # in in dividing wall
+
+Gcv_LR_d = h * surfaces['LR']['Door']               # door
+
+Gcv_LR_f = h * surfaces['LR']['Floor']              # floor
+
+# Convection zone 2 : BR
+Gcv_BR_w = h * surfaces['BR']['Wall']               # in wall
+
+Gcv_BR_dw = h * surfaces['BR']['Dividingwall']      # in in dividing wall
+
+Gcv_BR_f = h * surfaces['BR']['Floor']              # floor
+
+# Convection zone 3 : LR-BR
+Gcv_LRBR_dw = h * surfaces['LR-BR']['Dividingwall']   # in in dividing wall
+
+Gcv_LRBR_f = h * surfaces['LR-BR']['Door']           # door
+
+# Ventilation & advection
+Gv_LR =
+Gv_BR =
+
+# conductance de la fenetre ? calcul ? chercher U sur itnernet
+
 
 # Incidence matrix A
 # ------------------
@@ -163,7 +247,7 @@ A[59, 31] = 1
 # Vectors of temperature sources b
 # --------------------------------
 T0 = X      # outdoor temperature
-T1 = X      # next room temperature
+T1 = 20      # next room temperature
 T2 = X      # temperature wanted in the livingroom
 T3 = X      # temperature wanted in the bathroom
 
