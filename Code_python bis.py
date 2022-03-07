@@ -233,6 +233,19 @@ C_BR_f = materials['Density']['Floor'] * \
     materials['Specific heat']['Floor'] * \
     surfaces['BR']['Floor'] * materials['Width']['Floor']
 
+# zone 3 : LR-BR
+C_LRBR_dw_p = materials['Density']['Plaster'] * \
+    materials['Specific heat']['Plaster'] * \
+    surfaces['LR-BR']['Dividingwall'] * materials['Width']['Door']
+
+C_LRBR_dw_i = materials['Density']['Insulation'] * \
+    materials['Specific heat']['Insulation'] * \
+    surfaces['LR-BR']['Dividingwall'] * materials['Width']['Insulation']
+
+C_LRBR_d = materials['Density']['Door'] * \
+    materials['Specific heat']['Door'] * \
+    surfaces['LR-BR']['Door'] * materials['Width']['Door']
+
 # air
 C_LR_air = air['Density'] * air['Specific heat'] * Va_livingroom
 
