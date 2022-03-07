@@ -11,7 +11,7 @@ Code pour le projet M9
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-# import dm4bem
+import dm4bem
 
 
 # Physical values
@@ -427,15 +427,50 @@ G[58, 58] = Gr_BR  # renouv air BR
 
 # Capacity matrix C
 # -----------------
-# à insérer depuis github Emeline
+C = np.zeros([49, 49])
+
+# Room1 : LR
+# wall (ext)
+C[1, 1] = C_LR_w_c
+C[3, 3] = C_LR_w_i
+C[5, 5] = C_LR_w_p
+# floor
+C[8, 8] = C_LR_f
+# dividingwall
+C[14, 14] = C[18, 18] = C_LR_dw_p
+C[16, 16] = C_LR_dw_i
+# door
+C[11, 11] = C_LR_d
+# air
+C[20, 20] = C_LR_air
+
+# Partition wall : LR-BR
+# dividingwall
+C[22, 22] = C[26, 26] = C_LRBR_dw_p
+C[24, 24] = C_LRBR_dw_i
+# door
+C[29, 29] = C_LRBR_d
+
+# Room2
+# wall (ext)
+C[37, 37] = C_BR_w_c
+C[35, 35] = C_BR_w_i
+C[33, 33] = C_BR_w_p
+# floor
+C[40, 40] = C_BR_f
+# dividingwall
+C[47, 47] = C[43, 43] = C_BR_dw_p
+C[45, 45] = C_BR_dw_i
+# air
+C[31, 31] = C_BR_air
 
 
-# Vectors of temperature sources b      maybe depuis fichier météo ?
-# --------------------------------
-T0 = X      # outdoor temperature
+# Vector of temperature sources b      maybe depuis fichier météo ?
+# -------------------------------
+T0 = 0      # outdoor temperature
 T1 = 20     # next room temperature
-T2 = X      # temperature wanted in the livingroom
-T3 = X      # temperature wanted in the bathroom
+T2 = 0      # temperature wanted in the livingroom
+T3 = 0      # temperature wanted in the bathroom
 
 b = np.zeros(60)
 b[[0, 12, 24, 45, 57, 59]] = T0
@@ -443,10 +478,43 @@ b[[8, 16, 49]] = T1
 b[25] = T2
 b[58] = T3
 
-# Vectors of heat sources f
-# -------------------------
+# Vector of heat sources f
+# ------------------------
 f = np.zeros(49)
+f[[0, 38]] = 1
+f[6] = 1
+f[8] = 1
+f[19] = 1
+f[20] = 1
+f[21] = 1
+f[27] = 1
+f[31] = 1
+f[32] = 1
+f[40] = 1
+f[42] = 1
+
+# Vector of outputs
+# -----------------
+y = np.zeros(49)  # 1 si on veut que la T sorte, 0 sinon
+y[[20, 31]] = 1
+
+# Input vector
+# ------------
+u = np.hstack([b[np.nonzero(b)], f[np.nonzero(f)]])   # pq 'nonzero' ?
 
 
-f = np.zeros(8)
-f[[0, 4, 6, 7]] = 1000 + np.array([0, 4000, 6000, 7000])
+# Thermal circuit -> state-space
+# ==============================
+[As, Bs, Cs, Ds] = dm4bem.tc2ss(A, G, b, C, f, y)
+
+# Test: comparison steady-state of thermal circuit and state-space
+ytc = np.linalg.inv(A.T @ G @ A) @ (A.T @ G @ b + f)
+yss = (-Cs @ np.linalg.inv(As) @ Bs + Ds) @ u
+
+print(np.array_str(yss, precision=3, suppress_small=True))
+print(np.array_str(ytc, precision=3, suppress_small=True))
+print(f'Max error in steady-state between thermal circuit and state-space:\
+ {max(abs(yss - ytc)):.2e}')
+
+# Dynamic simulation
+# ==================
