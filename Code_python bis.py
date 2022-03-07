@@ -159,13 +159,50 @@ Gcv_BR_f = h * surfaces['BR']['Floor']              # floor
 # Convection zone 3 : LR-BR
 Gcv_LRBR_dw = h * surfaces['LR-BR']['Dividingwall']   # in in dividing wall
 
-Gcv_LRBR_f = h * surfaces['LR-BR']['Door']           # door
+Gcv_LRBR_d = h * surfaces['LR-BR']['Door']           # door
 
 # Ventilation & advection
-Gv_LR =
-Gv_BR =
+Gv_LR = Va_livingroom_dot * air['Density'] * air['Specific heat']
 
-# conductance de la fenetre ? calcul ? chercher U sur internet
+Gv_BR = Va_bathroom * air['Density'] * air['Specific heat']
+
+# Window : conductance Uw * S
+Uw = 1.1   # W/(m2.K) pour double-vitrage --> valeur à VÉRIFIER sur DB Jules
+
+Gw_LR = Uw * surfaces['LR']['Window']
+
+Gw_BR = Uw * surfaces['BR']['Window']
+
+# Thermal capacities
+# ------------------
+# zone 1 : LR
+C_LR_w_c = materials['Density']['Concrete'] * \
+    materials['Specific heat']['Concrete'] * \
+    surfaces['LR']['Wall'] * materials['Width']['Concrete']
+
+C_LR_w_i = materials['Density']['Insulation'] * \
+    materials['Specific heat']['Insulation'] * \
+    surfaces['LR']['Wall'] * materials['Width']['Insulation']
+
+C_LR_w_p = materials['Density']['Plaster'] * \
+    materials['Specific heat']['Plaster'] * \
+    surfaces['LR']['Wall'] * materials['Width']['Plaster']
+
+C_LR_dw_p = materials['Density']['Plaster'] * \
+    materials['Specific heat']['Plaster'] * \
+    surfaces['LR']['Dividingwall'] * materials['Width']['Plaster']
+
+C_LR_dw_i = materials['Density']['Insulation'] * \
+    materials['Specific heat']['Insulation'] * \
+    surfaces['LR']['Dividingwall'] * materials['Width']['Insulation']
+
+C_LR_d = materials['Density']['Door'] * \
+    materials['Specific heat']['Door'] * \
+    surfaces['LR']['Door'] * materials['Width']['Door']
+
+C_LR_f = materials['Density']['Floor'] * \
+    materials['Specific heat']['Floor'] * \
+    surfaces['LR']['Floor'] * materials['Width']['Floor']
 
 
 # Incidence matrix A
