@@ -165,7 +165,7 @@ Gcv_LRBR_f = h * surfaces['LR-BR']['Door']           # door
 Gv_LR =
 Gv_BR =
 
-# conductance de la fenetre ? calcul ? chercher U sur itnernet
+# conductance de la fenetre ? calcul ? chercher U sur internet
 
 
 # Incidence matrix A
