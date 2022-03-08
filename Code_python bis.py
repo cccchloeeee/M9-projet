@@ -539,5 +539,49 @@ weather = weather[(weather.index >= start_date) & (
     weather.index < end_date)]
 
 # Interpolate weather data for time step dt
-data = weather['temp_air']
+data = pd.concat([weather['temp_air']], axis=1)
 data = data.resample(str(dt) + 'S').interpolate(method='linear')
+
+# Indoor temperature set-point
+data['T2'] = 21 * np.ones(data.shape[0])
+data['T3'] = 23 * np.ones(data.shape[0])
+# Fix temperature set-point
+data['T1'] = 20 * np.ones(data.shape[0])
+
+data = data.rename(columns={'temp_air': 'T0'})
+
+# Indoor auxiliary heat flow rate
+data['Qa'] = 0 * np.ones(data.shape[0])
+data['Q0'] = 0 * np.ones(data.shape[0])
+
+u = pd.concat([data['T0'], data['T1'], data['T0'], data['T1'], data['T0'],
+               data['T2'], data['T0'], data['T1'], data['T0'], data['T3'],
+               data['T0'], data['Q0'], data['Q0'], data['Q0'], data['Q0'],
+               data['Qa'], data['Q0'], data['Q0'], data['Qa'], data['Q0'],
+               data['Q0'], data['Q0'], data['Q0']], axis=1)
+
+# initial values for temperatures
+temp_exp = 20 * np.ones([As.shape[0], u.shape[0]])
+
+# time
+t = dt * np.arange(data.shape[0])
+
+# integration in time
+I = np.eye(As.shape[0])
+for k in range(u.shape[0] - 1):
+    temp_exp[:, k + 1] = (I + dt * As) @ temp_exp[:, k]\
+        + dt * Bs @ u.iloc[k, :]
+# Indoor temperature
+y_exp = Cs @ temp_exp + Ds @ u.to_numpy().T
+# HVAC heat flow
+q_HVAC_LR = Kp * (data['T2'] - y_exp[0, :])
+q_HVAC_BR = Kp * (data['T3'] - y_exp[0, :])
+
+# plot indoor and outdoor temperature
+axs[1].plot(t / 3600, y_exp[0, :], label='$T_{indoor}$')
+axs[1].plot(t / 3600, data['T0'], label='$T_{outdoor}$')
+axs[1].set(xlabel='Time [h]',
+           ylabel='Temperatures [°C]',
+           title='Simulation for weather')
+axs[1].legend(loc='upper right')
+plt.show()
