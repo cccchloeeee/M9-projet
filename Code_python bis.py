@@ -18,8 +18,8 @@ import dm4bem
 # ===============
 # P-controler gain
 # ----------------
-Kp = 1e4            # Kp -> ∞ : almost perfect controller
-# Kp = 1e-3         # Kp -> 0 : no controller Kp -> 0
+# Kp = 1e4            # Kp -> ∞ : almost perfect controller
+Kp = 1e-3         # Kp -> 0 : no controller Kp -> 0
 Kp
 
 # Dimensions & surface areas
@@ -41,9 +41,7 @@ Va_bathroom_dot = ACH * Va_bathroom / 3600
 air = {'Density': 1.2,                      # kg/m³
        'Specific heat': 1000}               # J/kg.K
 
-"""From DesignBuilder"""
-# VALEURS FLOOR-DOOR-WINDOW A RECUPERER DE DESIGN BUILDER
-
+# Valeurs récupérées de DB
 materials = {'Conductivity': [2.3, 0.0457, 0.25, 0.19, 1.4],   # W/m.K
              'Density': [2300, 40, 2800, 700, 2100],           # kg/m³
              'Specific heat': [1000, 1450, 896, 2390, 840],    # J/kg.K
@@ -60,17 +58,8 @@ surfaces = {'LR': [13.11, 18.4, 6.6, 1.89, 48],      # m²
 surfaces = pd.DataFrame(
     surfaces, index=['Dividingwall', 'Wall', 'Window', 'Door', 'Floor'])
 
-# Radiative properties
-# --------------------
-σ = 5.67e-8     # W/m².K⁴ Stefan-Bolzmann constant
-
-Fpw = 8.13 / 93.07     # view factor plaster - window (facteur de forme)
-# valeur fausse --> RECALCULER AVEC SURFACE FIONA
-
-Tm = 20 + 273   # mean temperature for radiative exchange
-
 # convection coefficients, W/m² K
-h = pd.DataFrame([{'in': 4., 'out': 10}])   # Valeurs À VÉRIFIER sur DB
+h = pd.DataFrame([{'in': 4., 'out': 10}])
 
 
 # Thermal circuit (EN COURS DE MODIF)
@@ -167,7 +156,7 @@ Gv_LR = Va_livingroom_dot * air['Density'] * air['Specific heat']
 Gv_BR = Va_bathroom * air['Density'] * air['Specific heat']
 
 # Window : conductance Uw * S
-Uw = 1.1   # W/(m2.K) pour double-vitrage --> valeur à VÉRIFIER sur DB Jules
+Uw = 1.96   # W/(m2.K) pour double-vitrage selon DB
 
 Gw_LR = Uw * surfaces['LR']['Window']
 
@@ -324,7 +313,7 @@ A[59, 31] = 1
 # --------------------
 G = np.zeros([60, 60])
 
-# Room1
+# Livingroom
 # wall (ext)
 # convection
 G[0, 0] = Gcv_LR_w['out']  # convection wall concrete out
@@ -387,7 +376,7 @@ G[35, 35] = G[36, 36] = Gcd_LRBR_d  # conduction door
 # convection
 G[37, 37] = Gcv_LRBR_d['in']  # convection door inside
 
-# Room2
+# Bathroom
 # wall (ext)
 # convection
 G[45, 45] = Gcv_BR_w['out']  # convection wall concrete out
@@ -429,7 +418,10 @@ G[58, 58] = Gr_BR  # renouv air BR
 # -----------------
 C = np.zeros([49, 49])
 
-# Room1 : LR
+C_BR_air = C_BR_dw_i = C_BR_w_i = C_LR_dw_i = C_LRBR_dw_i = 0
+# C_BR_air = C_BR_dw_i = C_BR_w_i = C_LR_air = C_LR_dw_i = C_LR_w_i = C_LRBR_dw_i = 0
+
+# Livingroom : LR
 # wall (ext)
 C[1, 1] = C_LR_w_c
 C[3, 3] = C_LR_w_i
@@ -451,7 +443,7 @@ C[24, 24] = C_LRBR_dw_i
 # door
 C[29, 29] = C_LRBR_d
 
-# Room2
+# Bathroom
 # wall (ext)
 C[37, 37] = C_BR_w_c
 C[35, 35] = C_BR_w_i
@@ -464,34 +456,15 @@ C[45, 45] = C_BR_dw_i
 # air
 C[31, 31] = C_BR_air
 
-
-# Vector of temperature sources b      maybe depuis fichier météo ?
+# Vector of temperature sources b
 # -------------------------------
-T0 = 0      # outdoor temperature
-T1 = 20     # next room temperature
-T2 = 0      # temperature wanted in the livingroom
-T3 = 0      # temperature wanted in the bathroom
-
 b = np.zeros(60)
-b[[0, 12, 24, 45, 57, 59]] = T0
-b[[8, 16, 49]] = T1
-b[25] = T2
-b[58] = T3
+b[[0, 8, 12, 16, 24, 25, 45, 49, 57, 58, 59]] = 1
 
 # Vector of heat sources f
 # ------------------------
 f = np.zeros(49)
-f[[0, 38]] = 1
-f[6] = 1
-f[8] = 1
-f[19] = 1
-f[20] = 1
-f[21] = 1
-f[27] = 1
-f[31] = 1
-f[32] = 1
-f[40] = 1
-f[42] = 1
+f[[0, 6, 8, 19, 20, 21, 27, 31, 32, 38, 40, 42]] = 1
 
 # Vector of outputs
 # -----------------
@@ -500,21 +473,58 @@ y[[20, 31]] = 1
 
 # Input vector
 # ------------
-u = np.hstack([b[np.nonzero(b)], f[np.nonzero(f)]])   # pq 'nonzero' ?
+u = np.hstack([b[np.nonzero(b)], f[np.nonzero(f)]])
 
 
 # Thermal circuit -> state-space
 # ==============================
 [As, Bs, Cs, Ds] = dm4bem.tc2ss(A, G, b, C, f, y)
 
-# Test: comparison steady-state of thermal circuit and state-space
-ytc = np.linalg.inv(A.T @ G @ A) @ (A.T @ G @ b + f)
-yss = (-Cs @ np.linalg.inv(As) @ Bs + Ds) @ u
+# Maximum time-step
+dtmax = min(-2. / np.linalg.eig(As)[0])
+print(f'Maximum time step: {dtmax:.2f} s')
+# dt = 5
+dt = 360
+print(f'Time step: {dt:.2f} s')
 
-print(np.array_str(yss, precision=3, suppress_small=True))
-print(np.array_str(ytc, precision=3, suppress_small=True))
-print(f'Max error in steady-state between thermal circuit and state-space:\
- {max(abs(yss - ytc)):.2e}')
+# Step response
+# -------------
+duration = 3600 * 24 * 2        # [s]
+# number of steps
+n = int(np.floor(duration / dt))
 
-# Dynamic simulation
-# ==================
+t = np.arange(0, n * dt, dt)    # time vector
+
+# Vectors of state and input (in time)
+n_tC = As.shape[0]              # no of state variables (temps with capacity)
+# u = [To To To Tsp Phio Phii Qaux Phia]
+u = np.zeros([23, n])
+u[[0, 2, 4, 6, 8, 10]] = 1
+# u[0, 0] = u[2, 0] = u[4, 0] = u[6, 0] = u[8, 0] = u[10, 0] = 1
+
+u = np.zeros([8, n])
+u[0:3, :] = np.ones([3, n])
+
+# initial values for temperatures obtained by explicit and implicit Euler
+temp_exp = np.zeros([n_tC, t.shape[0]])
+temp_imp = np.zeros([n_tC, t.shape[0]])
+
+I = np.eye(n_tC)
+for k in range(n - 1):
+    temp_exp[:, k + 1] = (I + dt * As) @\
+        temp_exp[:, k] + dt * Bs @ u[:, k]
+    temp_imp[:, k + 1] = np.linalg.inv(I - dt * As) @\
+        (temp_imp[:, k] + dt * Bs @ u[:, k])
+
+y_exp = Cs @ temp_exp + Ds @  u
+y_imp = Cs @ temp_imp + Ds @  u
+
+fig, axs = plt.subplots(3, 1)
+axs[0].plot(t / 3600, y_exp[1].T, t / 3600, y_imp[1].T)
+axs[0].set(xlabel='Time [h]', ylabel='$T_i$ [°C]',
+           title='Step input: To = 1°C')
+plt.show()
+
+
+# Simulation with weather data
+# ----------------------------
