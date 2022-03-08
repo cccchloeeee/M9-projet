@@ -502,9 +502,6 @@ u = np.zeros([23, n])
 u[[0, 2, 4, 6, 8, 10]] = 1
 # u[0, 0] = u[2, 0] = u[4, 0] = u[6, 0] = u[8, 0] = u[10, 0] = 1
 
-u = np.zeros([8, n])
-u[0:3, :] = np.ones([3, n])
-
 # initial values for temperatures obtained by explicit and implicit Euler
 temp_exp = np.zeros([n_tC, t.shape[0]])
 temp_imp = np.zeros([n_tC, t.shape[0]])
@@ -519,6 +516,7 @@ for k in range(n - 1):
 y_exp = Cs @ temp_exp + Ds @  u
 y_imp = Cs @ temp_imp + Ds @  u
 
+
 fig, axs = plt.subplots(3, 1)
 axs[0].plot(t / 3600, y_exp[1].T, t / 3600, y_imp[1].T)
 axs[0].set(xlabel='Time [h]', ylabel='$T_i$ [°C]',
@@ -528,3 +526,18 @@ plt.show()
 
 # Simulation with weather data
 # ----------------------------
+filename = 'FRA_Lyon.074810_IWEC.epw'
+start_date = '2000-01-03 12:00:00'
+end_date = '2000-01-04 12:00:00'   # 1983
+
+# Read weather data from Energyplus .epw file
+[data, meta] = dm4bem.read_epw(filename, coerce_year=None)
+weather = data[["temp_air", "dir_n_rad", "dif_h_rad"]]
+del data
+weather.index = weather.index.map(lambda t: t.replace(year=2000))
+weather = weather[(weather.index >= start_date) & (
+    weather.index < end_date)]
+
+# Interpolate weather data for time step dt
+data = weather['temp_air']
+data = data.resample(str(dt) + 'S').interpolate(method='linear')
