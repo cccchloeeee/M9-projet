@@ -44,13 +44,13 @@ air = {'Density': 1.2,                      # kg/m³
 """From DesignBuilder"""
 # VALEURS FLOOR-DOOR-WINDOW A RECUPERER DE DESIGN BUILDER
 
-materials = {'Conductivity': [2.3, 0.0457, 0.25, 0, 0, 0],      # W/m.K
-             'Density': [2300, 40, 28000, 0, 0, 0],             # kg/m³
-             'Specific heat': [1000, 1450, 896, 0, 0, 0],       # J/kg.K
-             'Width': [0.3, 0.05, 0.013, 0, 0, 0],              # m
-             'Slice': [1, 1, 1, 1, 1, 1]}                       # nb of meshes
+materials = {'Conductivity': [2.3, 0.0457, 0.25, 0.19, 1.4],   # W/m.K
+             'Density': [2300, 40, 2800, 700, 2100],           # kg/m³
+             'Specific heat': [1000, 1450, 896, 2390, 840],    # J/kg.K
+             'Width': [0.3, 0.05, 0.013, 0.035, 0.1],          # m
+             'Slice': [1, 1, 1, 1, 1]}                         # nb of meshes
 materials = pd.DataFrame(
-    materials, index=['Concrete', 'Insulation', 'Plaster', 'Glass', 'Door',
+    materials, index=['Concrete', 'Insulation', 'Plaster', 'Door',
                       'Floor'])
 
 # Surfaces
