@@ -18,15 +18,9 @@ import dm4bem
 # ===============
 # P-controler gain
 # ----------------
-# Kp = 1e4            # Kp -> ∞ : almost perfect controller
-Kp = 1e-3         # Kp -> 0 : no controller Kp -> 0
+Kp = 1e4            # Kp -> ∞ : almost perfect controller
+# Kp = 1e-3         # Kp -> 0 : no controller Kp -> 0
 Kp
-
-# Dimensions & surface areas
-# --------------------------
-l = 4               # m largeur du studio
-L = 8               # m longueur du studio
-H = 2.5             # m hauteur du studio
 
 # Air-flow rate
 # -------------
@@ -36,7 +30,7 @@ ACH = 1             # air changes per hour
 Va_livingroom_dot = ACH * Va_livingroom / 3600    # m³/s air infiltration
 Va_bathroom_dot = ACH * Va_bathroom / 3600
 
-# Thermophyscal properties
+# Thermophysical properties
 # ------------------------
 air = {'Density': 1.2,                      # kg/m³
        'Specific heat': 1000}               # J/kg.K
@@ -62,7 +56,7 @@ surfaces = pd.DataFrame(
 h = pd.DataFrame([{'in': 4., 'out': 10}])
 
 
-# Thermal circuit (EN COURS DE MODIF)
+# Thermal circuit
 # ===============
 
 # Thermal conductances
@@ -483,8 +477,8 @@ u = np.hstack([b[np.nonzero(b)], f[np.nonzero(f)]])
 # Maximum time-step
 dtmax = min(-2. / np.linalg.eig(As)[0])
 print(f'Maximum time step: {dtmax:.2f} s')
-# dt = 10
-dt = 360
+dt = 10
+# dt = 360
 print(f'Time step: {dt:.2f} s')
 
 # Step response
