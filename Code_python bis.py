@@ -483,7 +483,7 @@ u = np.hstack([b[np.nonzero(b)], f[np.nonzero(f)]])
 # Maximum time-step
 dtmax = min(-2. / np.linalg.eig(As)[0])
 print(f'Maximum time step: {dtmax:.2f} s')
-# dt = 5
+# dt = 10
 dt = 360
 print(f'Time step: {dt:.2f} s')
 
@@ -517,10 +517,10 @@ y_exp = Cs @ temp_exp + Ds @  u
 y_imp = Cs @ temp_imp + Ds @  u
 
 
-fig, axs = plt.subplots(3, 1)
-axs[0].plot(t / 3600, y_exp[1].T, t / 3600, y_imp[1].T)
-axs[0].set(xlabel='Time [h]', ylabel='$T_i$ [°C]',
-           title='Step input: To = 1°C')
+plt.plot(t/3600, y_exp[1].T, t / 3600, y_imp[1].T)
+plt.xlabel('Time [h]')
+plt.ylabel('$T_i$ [°C]')
+plt.title('Step input: T0 = 1°C')
 plt.show()
 
 
@@ -578,10 +578,19 @@ q_HVAC_LR = Kp * (data['T2'] - y_exp[0, :])
 q_HVAC_BR = Kp * (data['T3'] - y_exp[0, :])
 
 # plot indoor and outdoor temperature
-axs[1].plot(t / 3600, y_exp[0, :], label='$T_{indoor}$')
-axs[1].plot(t / 3600, data['T0'], label='$T_{outdoor}$')
-axs[1].set(xlabel='Time [h]',
-           ylabel='Temperatures [°C]',
-           title='Simulation for weather')
-axs[1].legend(loc='upper right')
+plt.plot(t / 3600, y_exp[0, :], label='$T_{indoor}$')
+plt.plot(t / 3600, data['T0'], label='$T_{outdoor}$')
+plt.xlabel('Time [h]')
+plt.ylabel('Temperatures [°C]')
+plt.title('Simulation for weather')
+plt.legend(loc='upper right')
+plt.show()
+
+# plot HVAC heat flow
+plt.plot(t / 3600, q_HVAC_LR, label='$q_{HVAC LR}$')
+plt.plot(t / 3600, q_HVAC_BR, label='$q_{HVAC BR}$')
+plt.xlabel('Time [h]')
+plt.ylabel('Heat flows [W]')
+plt.title('Simulation for weather')
+plt.legend(loc='upper right')
 plt.show()
