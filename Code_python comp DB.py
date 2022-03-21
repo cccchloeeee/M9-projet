@@ -550,8 +550,8 @@ data = data.rename(columns={'temp_air': 'T0'})
 data['Qa'] = 0 * np.ones(data.shape[0])
 data['Q0'] = 0 * np.ones(data.shape[0])
 
-u = pd.concat([data['T0'], data['T1'], data['T0'], data['T1'], data['T0'],
-               data['T2'], data['T0'], data['T1'], data['T0'], data['T3'],
+u = pd.concat([data['T0'], data['T0'], data['T0'], data['T0'], data['T0'],
+               data['T2'], data['T0'], data['T0'], data['T0'], data['T3'],
                data['T0'], data['Q0'], data['Q0'], data['Q0'], data['Q0'],
                data['Qa'], data['Q0'], data['Q0'], data['Qa'], data['Q0'],
                data['Q0'], data['Q0'], data['Q0']], axis=1)
