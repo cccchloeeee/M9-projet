@@ -18,8 +18,8 @@ import dm4bem
 # ===============
 # P-controler gain
 # ----------------
-# Kp = 1e4            # Kp -> ∞ : almost perfect controller
-Kp = 1e2
+Kp = 1e4            # Kp -> ∞ : almost perfect controller
+# Kp = 1e2
 # Kp = 1e-3         # Kp -> 0 : no controller Kp -> 0
 Kp
 
@@ -478,8 +478,8 @@ u = np.hstack([b[np.nonzero(b)], f[np.nonzero(f)]])
 # Maximum time-step
 dtmax = min(-2. / np.linalg.eig(As)[0])
 print(f'Maximum time step: {dtmax:.2f} s')
-# dt = 10
-dt = 100
+dt = 10
+# dt = 100
 # dt = 360
 print(f'Time step: {dt:.2f} s')
 
@@ -574,7 +574,8 @@ q_HVAC_LR = Kp * (data['T2'] - y_exp[0, :])
 q_HVAC_BR = Kp * (data['T3'] - y_exp[0, :])
 
 # plot indoor and outdoor temperature
-plt.plot(t / 3600, y_exp[0, :], label='$T_{indoor}$')
+plt.figure(figsize=(25, 4))
+plt.plot(t / 3600, y_exp[0, :], label='$T_{indoor}$', color='b')
 plt.plot(t / 3600, data['T0'], label='$T_{outdoor}$')
 plt.xlabel('Time [h]')
 plt.ylabel('Temperatures [°C]')
@@ -583,6 +584,7 @@ plt.legend(loc='upper right')
 plt.show()
 
 # plot HVAC heat flow
+plt.figure(figsize=(25, 4))
 plt.plot(t / 3600, q_HVAC_LR, label='$q_{HVAC LR}$')
 plt.plot(t / 3600, q_HVAC_BR, label='$q_{HVAC BR}$')
 plt.xlabel('Time [h]')
